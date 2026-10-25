@@ -1,0 +1,8 @@
+# Extra baseline: small convolutional recurrent network
+_base_: base.yaml
+experiment: crnn
+model:
+  name: crnn
+  channels: 32
+  hidden: 64
+  dropout: 0.2
