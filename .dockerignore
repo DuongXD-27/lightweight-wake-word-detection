@@ -1,0 +1,11 @@
+data/
+data_synth/
+runs_smoke/
+mlruns/
+mlflow/
+.git/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
