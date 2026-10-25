@@ -1,0 +1,28 @@
+# data & artefacts (version large files with DVC or keep them out of git)
+data/
+data_synth/
+runs/
+runs_smoke/
+mlruns/
+mlflow/
+pretrained/
+*.wav
+*.mp3
+*.flac
+*.onnx
+*.pt
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+# os / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+.env
