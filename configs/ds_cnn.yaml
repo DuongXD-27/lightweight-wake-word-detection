@@ -1,0 +1,8 @@
+# Approach A: DS-CNN trained from scratch on log-mel features
+_base_: base.yaml
+experiment: ds_cnn
+model:
+  name: ds_cnn
+  channels: 64
+  n_blocks: 4
+  dropout: 0.2
