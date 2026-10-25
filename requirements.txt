@@ -1,0 +1,15 @@
+# Core: training, evaluation, export and the Gradio demo.
+# CPU-only PyTorch (smaller):  pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+torch>=2.3
+torchaudio>=2.3
+numpy>=1.26
+scipy>=1.11
+soundfile>=0.12
+pandas>=2.1
+scikit-learn>=1.4
+PyYAML>=6.0
+matplotlib>=3.8
+tabulate>=0.9
+onnx>=1.16
+onnxruntime>=1.18
+gradio>=5.0,<7
