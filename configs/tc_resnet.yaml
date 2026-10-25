@@ -1,0 +1,9 @@
+# Approach B: TC-ResNet8 (temporal 1-D convolutions, frequency bins as channels)
+_base_: base.yaml
+experiment: tc_resnet
+model:
+  name: tc_resnet
+  width: 1.5
+  layers: 3
+  kernel: 9
+  dropout: 0.2
