@@ -1,0 +1,2 @@
+mlflow-skinny>=2.12
+dvc>=3.0

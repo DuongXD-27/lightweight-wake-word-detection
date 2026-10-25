@@ -1,0 +1,16 @@
+# Optional data/experiment pipeline with DVC:  dvc repro   (needs: pip install dvc)
+stages:
+  manifest:
+    cmd: python scripts/build_manifest.py -c configs/base.yaml
+    deps: [data/raw, scripts/build_manifest.py, wakeword/data.py]
+    outs: [data/manifests/manifest.csv]
+  train_tc_resnet:
+    cmd: python scripts/train.py -c configs/tc_resnet.yaml
+    deps: [data/manifests/manifest.csv, configs/tc_resnet.yaml, configs/base.yaml, wakeword]
+    outs: [runs/tc_resnet/best.pt]
+    metrics: [runs/tc_resnet/train_summary.json: {cache: false}]
+  eval_tc_resnet:
+    cmd: python scripts/evaluate.py --checkpoint runs/tc_resnet/best.pt
+    deps: [runs/tc_resnet/best.pt, scripts/evaluate.py]
+    metrics: [runs/tc_resnet/eval_test_torch/report.json: {cache: false}]
+    plots: [runs/tc_resnet/eval_test_torch/det.csv: {x: fa_per_hour, y: frr}]

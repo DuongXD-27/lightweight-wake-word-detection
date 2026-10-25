@@ -1,0 +1,3 @@
+# Data ablation 4: + mined hard negatives from V1 (= Model V2). Run scripts/mine_hard_negatives.py first.
+_base_: ../tc_resnet.yaml
+experiment: abl_a4_plus_mined

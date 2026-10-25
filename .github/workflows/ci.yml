@@ -1,0 +1,28 @@
+name: ci
+on:
+  push: {branches: [main]}
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.11", cache: pip}
+      - name: System deps
+        run: sudo apt-get update && sudo apt-get install -y libsndfile1 ffmpeg
+      - name: Python deps
+        run: |
+          pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check wakeword scripts apps tests  
+      - name: Tests (unit + end-to-end smoke on synthetic data)
+        run: pytest -q
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build demo image
+        run: docker build -f docker/Dockerfile --target demo -t wakeword-demo .

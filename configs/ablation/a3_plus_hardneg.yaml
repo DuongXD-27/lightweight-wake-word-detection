@@ -1,0 +1,5 @@
+# Data ablation 3: + designed hard negatives (= Model V1)
+_base_: ../tc_resnet.yaml
+experiment: abl_a3_plus_hardneg
+data:
+  drop_sources: [mined]

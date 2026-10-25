@@ -1,0 +1,103 @@
+# Base configuration. Experiment configs inherit with `_base_: base.yaml`.
+# Override anything from the CLI:  python scripts/train.py -c configs/tc_resnet.yaml --set train.epochs=10
+
+experiment: base
+seed: 1337
+
+paths:
+  raw: data/raw
+  mined: data/mined
+  manifest: data/manifests/manifest.csv
+  runs: runs                       # checkpoints + reports land in runs/<experiment>/
+
+audio:
+  sample_rate: 16000
+  clip_seconds: 2.0                # window length; "Alo GPT à em" + ≤0.5 s hesitation must fit
+
+features:
+  type: logmel                     # logmel | oww (frozen openWakeWord embeddings)
+  n_mels: 40
+  win_ms: 25
+  hop_ms: 10
+  n_fft: 512
+
+model:
+  name: ds_cnn
+  channels: 64
+  n_blocks: 4
+  dropout: 0.2
+
+split:                             # speaker-disjoint split (see wakeword/data.py)
+  val_ratio: 0.15
+  test_ratio: 0.2
+  salt: v1
+  external_prefix: ext_            # recorded people outside the team -> test only
+  test_speakers: []                # e.g. [duong, ext_minh]  (folder names under data/raw/real)
+  val_speakers: []
+  train_speakers: []
+  tts_split: train                 # train | by_voice
+
+data:
+  num_workers: 4
+  cache_items: 20000
+  virtual_silence: 200             # synthetic near-silent windows added to train
+  group_weights:                   # sampling mix per batch
+    pos: 0.30
+    hard: 0.25
+    neg: 0.25
+    long: 0.10
+    noise: 0.10
+  drop_sources: []                 # ablations, e.g. [tts]
+  drop_categories: []              # ablations, e.g. [hard_partial, hard_substitution, ...]
+
+aug:
+  enabled: true
+  speed_prob: 0.5
+  speed_range: [0.9, 1.1]
+  pitch_prob: 0.0                  # keep pitch-shift light / off (slow and unrealistic)
+  pitch_semitones: [-1.5, 1.5]
+  rir_prob: 0.3
+  rir_dirs: [data/rir]
+  noise_prob: 0.7
+  babble_frac: 0.3                 # share of noise draws taken from negative speech (babble)
+  snr_db: [0, 20]
+  gain_prob: 0.5
+  gain_db: [-15, 6]
+  trailing_speech_prob: 0.2        # positive followed by a command-like utterance
+  extra_noise_dirs: []
+  specaug:
+    enabled: true
+    freq_masks: 2
+    freq_width: 6
+    time_masks: 2
+    time_width: 15
+
+train:
+  epochs: 30
+  steps_per_epoch: 300
+  batch_size: 128
+  lr: 0.003
+  weight_decay: 0.0001
+  warmup_epochs: 1
+  label_smoothing: 0.05
+  pos_weight: 1.0
+  grad_clip: 5.0
+  device: auto                     # auto | cpu | cuda
+  early_stop_patience: 8
+  select_metric: val_frr_at_far    # val_frr_at_far (lower better) | val_auc (higher better)
+  target_val_far: 0.01             # clip-level FAR used to pick the validation threshold
+
+eval:
+  hop_s: 0.1
+  smooth_k: 3
+  refractory_s: 2.0
+  pad_before_s: 1.0
+  pad_after_s: 0.5
+  fa_budgets: [0.1, 0.5, 1.0]      # report FRR at these false-activations-per-hour budgets
+  n_thresholds: 99
+  long_split: test                 # which data/raw/long/<split> to use for FA/hour
+
+tracking:
+  enabled: false                   # set true (or --set tracking.enabled=true) to log to MLflow
+  experiment: wakeword
+  uri: file:./mlruns

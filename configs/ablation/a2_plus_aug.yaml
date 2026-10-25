@@ -1,0 +1,6 @@
+# Data ablation 2: + waveform augmentation (noise, RIR, speed, gain) and SpecAugment
+_base_: ../tc_resnet.yaml
+experiment: abl_a2_plus_aug
+data:
+  drop_sources: [mined]
+  drop_categories: [hard_partial, hard_substitution, hard_phonetic, hard_reorder, hard_common, hard_long_pause, hard_mined]

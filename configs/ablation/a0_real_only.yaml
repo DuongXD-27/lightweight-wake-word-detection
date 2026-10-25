@@ -1,0 +1,9 @@
+# Data ablation 0: real recordings only, no augmentation, no hard negatives
+_base_: ../tc_resnet.yaml
+experiment: abl_a0_real_only
+data:
+  drop_sources: [tts, mined]
+  drop_categories: [hard_partial, hard_substitution, hard_phonetic, hard_reorder, hard_common, hard_long_pause, hard_mined]
+aug:
+  enabled: false
+  specaug: {enabled: false}

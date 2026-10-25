@@ -1,0 +1,24 @@
+# Tiny config for CI / smoke tests on synthetic data (scripts/make_synthetic_data.py)
+_base_: base.yaml
+experiment: smoke
+paths:
+  raw: data_synth/raw
+  mined: data_synth/mined
+  manifest: data_synth/manifests/manifest.csv
+  runs: runs_smoke
+model:
+  name: ds_cnn
+  channels: 16
+  n_blocks: 2
+data:
+  num_workers: 0
+  virtual_silence: 20
+aug:
+  rir_dirs: [data_synth/rir]
+train:
+  epochs: 2
+  steps_per_epoch: 10
+  batch_size: 32
+  device: cpu
+eval:
+  n_thresholds: 19

@@ -1,0 +1,9 @@
+# Data ablation 1: + synthetic (TTS) speech
+_base_: ../tc_resnet.yaml
+experiment: abl_a1_plus_tts
+data:
+  drop_sources: [mined]
+  drop_categories: [hard_partial, hard_substitution, hard_phonetic, hard_reorder, hard_common, hard_long_pause, hard_mined]
+aug:
+  enabled: false
+  specaug: {enabled: false}

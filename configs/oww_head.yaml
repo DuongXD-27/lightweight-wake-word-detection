@@ -1,0 +1,21 @@
+# Approach C: transfer learning - frozen openWakeWord (Google speech-embedding) front-end + small head.
+# Embedding extraction runs in ONNX Runtime on CPU inside the data loader.
+_base_: base.yaml
+experiment: oww_head
+features:
+  type: oww
+  model_dir: pretrained/oww
+model:
+  name: emb_head
+  hidden: 128
+  kind: mlp
+  dropout: 0.3
+aug:
+  specaug:
+    enabled: true
+    freq_masks: 1
+    freq_width: 8
+    time_masks: 1
+    time_width: 2
+train:
+  lr: 0.001

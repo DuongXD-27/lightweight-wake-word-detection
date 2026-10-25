@@ -1,0 +1,66 @@
+# docker compose up demo mlflow            -> demo on :7860, MLflow UI on :5000
+# docker compose up collect                -> data-collection app on :7861
+# docker compose run --rm train            -> train (CPU) with MLflow tracking
+# docker compose --profile gpu run --rm train-gpu
+services:
+  demo:
+    build: {context: ., dockerfile: docker/Dockerfile, target: demo}
+    image: wakeword-demo:latest
+    ports: ["7860:7860"]
+    volumes:
+      - ./runs:/app/runs:ro
+      - ./pretrained:/app/pretrained
+    environment:
+      - WAKEWORD_BACKEND=${WAKEWORD_BACKEND:-mock}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+
+  collect:
+    image: wakeword-demo:latest
+    build: {context: ., dockerfile: docker/Dockerfile, target: demo}
+    command: ["python", "apps/collect_app.py", "--out", "data/raw/real", "--parts", "data/parts", "--port", "7861"]
+    ports: ["7861:7861"]
+    volumes:
+      - ./data:/app/data
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.17.2
+    command: >
+      mlflow server --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlflow/mlflow.db
+      --artifacts-destination /mlflow/artifacts --serve-artifacts
+    ports: ["5000:5000"]
+    volumes:
+      - ./mlflow:/mlflow
+
+  train:
+    build: {context: ., dockerfile: docker/Dockerfile, target: train}
+    image: wakeword-train:latest
+    profiles: ["train"]
+    depends_on: [mlflow]
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./data:/app/data
+      - ./runs:/app/runs
+      - ./configs:/app/configs
+      - ./pretrained:/app/pretrained
+    command: ["python", "scripts/train.py", "-c", "configs/tc_resnet.yaml", "--set", "tracking.enabled=true"]
+
+  train-gpu:
+    build: {context: ., dockerfile: docker/Dockerfile.gpu}
+    image: wakeword-train-gpu:latest
+    profiles: ["gpu"]
+    depends_on: [mlflow]
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+    volumes:
+      - ./data:/app/data
+      - ./runs:/app/runs
+      - ./configs:/app/configs
+      - ./pretrained:/app/pretrained
+    shm_size: "2gb"
+    deploy:
+      resources:
+        reservations:
+          devices: [{driver: nvidia, count: 1, capabilities: [gpu]}]
+    command: ["python", "scripts/train.py", "-c", "configs/tc_resnet.yaml", "--set", "tracking.enabled=true", "train.device=cuda"]
